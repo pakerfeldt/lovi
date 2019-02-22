@@ -1,0 +1,25 @@
+policies:
+  - id: alarm
+    ack: true
+    ackTimeoutSeconds: 15
+    autoResolveAfterSeconds: 900
+    broadcast: false
+    receivers:
+      - name: Anna
+        transport: log
+        target: Receiver1
+      - name: Bob
+        transport: log
+        target: Receiver2
+  - id: information
+    ack: false
+    broadcast: true
+    receivers:
+      - name: Anna
+        transport: log
+        target: Receiver1
+      - name: Bob
+        transport: log
+        target: Receiver2
+transports:
+  - id: log

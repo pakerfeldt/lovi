@@ -1,0 +1,9 @@
+language: go
+services:
+  - docker
+script:
+  - make build
+  - test -f bin/linux_amd64/lovi
+  - make all-container
+  - docker images | grep "^pakerfeldt/lovi.*__linux_amd64"
+  - make test
