@@ -1,5 +1,7 @@
 # Lovi
 
+[![Build Status](https://travis-ci.org/pakerfeldt/lovi.svg?branch=master)](https://travis-ci.org/pakerfeldt/lovi)
+
 Lovi is a light weight pager application for message distribution. Use the web API to trigger events that gets sent to receivers according to a pre-defined policy.
 
 This application currently supports the following transport mechanisms:
@@ -9,7 +11,7 @@ This application currently supports the following transport mechanisms:
 
 ## How does it work?
 
-Lovi is configured using a yaml files. Here you define the set of policies that suits your need. A policy defines how a message gets distributed and contains an ordered list of receivers to receive the events. You can choose to require an acknowledgement and have the message be sent to each receiver until someone acknowledge the message.
+Lovi is configured using a yaml file. Here you define the set of policies that suits your need. A policy defines how a message gets distributed and contains an ordered list of receivers to receive the events. You can choose to require an acknowledgement and have the message be sent to each receiver until someone acknowledge the message.
 
 You can have multiple policies for different needs, each with its own set of configuration.
 
