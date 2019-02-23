@@ -15,6 +15,7 @@
 FROM {ARG_FROM}
 
 ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
+ADD config.example.yaml /config.yaml
 
 USER nobody:nobody
 ENTRYPOINT ["/{ARG_BIN}"]
