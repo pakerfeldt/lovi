@@ -33,23 +33,23 @@ func TestAddTransportTwiceCausesPanic(t *testing.T) {
 	AddTransport(fakeTransport{})
 }
 
-func TestHandleAlertWithUnknownPolicyReturnsError(t *testing.T) {
+func TestHandleEventWithUnknownPolicyReturnsError(t *testing.T) {
 	initialise()
-	err := HandleAlert("unknownPolicy", "message")
+	err := HandleEvent("unknownPolicy", "message")
 	if err == nil {
-		t.Error("Did not receive error handling alert with unknown policy")
+		t.Error("Did not receive error handling event with unknown policy")
 	}
 }
 
-func TestHandleAlertWithoutAckDoesNotStoreAlertInUnAckedAlerts(t *testing.T) {
+func TestHandleEventWithoutAckDoesNotStoreEventInUnAckedEvents(t *testing.T) {
 	initialise()
 	AddPolicy(models.Policy{ID: "information", Ack: false,
 		Receivers: []models.Receiver{models.Receiver{Transport: "fake", Target: "User1"}}})
 	AddTransport(fakeTransport{})
-	HandleAlert("information", "message")
-	_, exists := unAckedAlerts.Load("someId")
+	HandleEvent("information", "message")
+	_, exists := unAckedEvents.Load("someId")
 	if exists {
-		t.Error("Expecting non-ack alert to not be acknowledged")
+		t.Error("Expecting non-ack event to not be acknowledged")
 	}
 }
 

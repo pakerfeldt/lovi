@@ -13,7 +13,7 @@ import (
 
 var transports map[string]t.Transport
 var policies map[string]models.Policy
-var unAckedAlerts *UnAckedAlertsMap
+var unAckedEvents *UnAckedEventsMap
 
 func AddPolicy(policy models.Policy) {
 	_, exists := policies[policy.ID]
@@ -34,7 +34,7 @@ func AddTransport(transport t.Transport) {
 func initialise() {
 	policies = make(map[string]models.Policy)
 	transports = make(map[string]t.Transport)
-	unAckedAlerts = NewUnAckedAlertsMap()
+	unAckedEvents = NewUnAckedEventsMap()
 }
 
 func init() {
@@ -42,53 +42,53 @@ func init() {
 }
 
 func HandleAck(ID string) {
-	log.Printf("Alert '%s' acked", ID)
-	unAckedAlerts.Delete(ID)
+	log.Printf("Event '%s' acked", ID)
+	unAckedEvents.Delete(ID)
 }
 
-func HandleAlert(policyId string, message string) error {
+func HandleEvent(policyId string, message string) error {
 	id := idgenerator.New()
 	messageReplaced := strings.Replace(message, "{{ID}}", id, -1)
-	alert := models.Alert{ID: id, Time: time.Now(), Policy: policyId, Message: messageReplaced}
-	policy, ok := policies[alert.Policy]
+	event := models.Event{ID: id, Time: time.Now(), Policy: policyId, Message: messageReplaced}
+	policy, ok := policies[event.Policy]
 	if !ok {
-		return errors.New("Unknown policy: " + alert.Policy)
+		return errors.New("Unknown policy: " + event.Policy)
 	}
 	if policy.Ack {
-		unAckedAlerts.Store(alert.ID, alert)
-		scheduleAlertWithAckRequired(time.NewTimer(0), alert, policy)
+		unAckedEvents.Store(event.ID, event)
+		scheduleEventWithAckRequired(time.NewTimer(0), event, policy)
 	} else {
-		sendAlert(alert, policy, false)
+		sendEvent(event, policy, false)
 	}
 	return nil
 }
 
-func sendAlert(alert models.Alert, policy models.Policy, ackRequired bool) {
+func sendEvent(event models.Event, policy models.Policy, ackRequired bool) {
 	if policy.Broadcast {
 		for _, receiver := range policy.Receivers {
 			transport := transports[receiver.Transport]
 			target := receiver.Target
-			go transport.Send(alert.ID, alert.Message, target, ackRequired)
+			go transport.Send(event.ID, event.Message, target, ackRequired)
 		}
 	} else {
-		transport := transports[policy.Receivers[alert.ReceiverIndex].Transport]
-		target := policy.Receivers[alert.ReceiverIndex].Target
-		go transport.Send(alert.ID, alert.Message, target, ackRequired)
+		transport := transports[policy.Receivers[event.ReceiverIndex].Transport]
+		target := policy.Receivers[event.ReceiverIndex].Target
+		go transport.Send(event.ID, event.Message, target, ackRequired)
 	}
 }
 
-func scheduleAlertWithAckRequired(timer *time.Timer, alert models.Alert, policy models.Policy) {
+func scheduleEventWithAckRequired(timer *time.Timer, event models.Event, policy models.Policy) {
 	go func() {
 		<-timer.C
-		_, notAcked := unAckedAlerts.Load(alert.ID)
+		_, notAcked := unAckedEvents.Load(event.ID)
 		if notAcked {
-			log.Printf("Alert not acked - triggered: %s\n", alert.Time.String())
-			if policy.AutoResolveAfterSeconds > 0 && time.Now().Sub(alert.Time).Seconds() > float64(policy.AutoResolveAfterSeconds) {
-				log.Printf("Alert auto resolved after %d seconds\n", policy.AutoResolveAfterSeconds)
-				unAckedAlerts.Delete(alert.ID)
+			log.Printf("Event not acked - triggered: %s\n", event.Time.String())
+			if policy.AutoResolveAfterSeconds > 0 && time.Now().Sub(event.Time).Seconds() > float64(policy.AutoResolveAfterSeconds) {
+				log.Printf("Event auto resolved after %d seconds\n", policy.AutoResolveAfterSeconds)
+				unAckedEvents.Delete(event.ID)
 			} else {
-				sendAlert(alert, policy, true)
-				scheduleAlertWithAckRequired(time.NewTimer(time.Duration(policy.AckTimeoutSeconds)*time.Second), alert, policy)
+				sendEvent(event, policy, true)
+				scheduleEventWithAckRequired(time.NewTimer(time.Duration(policy.AckTimeoutSeconds)*time.Second), event, policy)
 			}
 		}
 	}()

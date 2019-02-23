@@ -61,12 +61,12 @@ func (c Call46Elk) incomingCallAction(w http.ResponseWriter, r *http.Request) {
 	result := r.FormValue("result")
 	callId := r.FormValue("callid")
 	if result == "1" {
-		alertId, exists := c.calls[callId]
+		eventId, exists := c.calls[callId]
 		if exists {
 			delete(c.calls, callId)
-			c.ack(alertId)
+			c.ack(eventId)
 		} else {
-			log.Printf("46elk-call: Unknown alert associated with call id %s\n", callId)
+			log.Printf("46elk-call: Unknown event associated with call id %s\n", callId)
 		}
 	}
 	fmt.Fprintf(w, "{\"hangup\": \"busy\"}")

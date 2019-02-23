@@ -17,8 +17,7 @@ type TransportConfig struct {
 	Configuration map[string]string
 }
 
-// Alert represents an outgoing alert
-type Alert struct {
+type Event struct {
 	ID            string
 	Time          time.Time
 	Message       string
@@ -28,16 +27,16 @@ type Alert struct {
 	AckedBy       string
 }
 
-func (a Alert) Id() string {
-	return a.ID
+func (e Event) Id() string {
+	return e.ID
 }
 
-func (a Alert) Acked(ackedAt time.Time, ackedBy string) Alert {
-	return Alert{ID: a.ID,
-		Time:          a.Time,
-		Message:       a.Message,
-		Policy:        a.Policy,
-		ReceiverIndex: a.ReceiverIndex,
+func (e Event) Acked(ackedAt time.Time, ackedBy string) Event {
+	return Event{ID: e.ID,
+		Time:          e.Time,
+		Message:       e.Message,
+		Policy:        e.Policy,
+		ReceiverIndex: e.ReceiverIndex,
 		AckedAt:       ackedAt,
 		AckedBy:       ackedBy}
 }
