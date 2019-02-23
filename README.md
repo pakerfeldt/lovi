@@ -15,6 +15,8 @@ Lovi is configured using a yaml file. Here you activate the transports you want 
 
 You can have multiple policies for different needs, each with its own set of configuration.
 
+An event is triggered by calling `http://[your-ip]:8080/event/trigger/{policy}?message=Your%20message`.
+
 ## Running
 
 The recommended way of running lovi is through Docker.
