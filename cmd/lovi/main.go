@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"flag"
 
 	"github.com/gorilla/mux"
 	"github.com/pakerfeldt/lovi/pkg/api"
@@ -12,15 +11,10 @@ import (
 )
 
 func main() {
-	var configFile string
-	flag.StringVar(&configFile, "config", "", "Path to configuration file")
-	flag.Parse()
-
-	if configFile == "" {
-		panic(errors.New("No configuration file specified"))
-	}
+	settings := config.Settings()
 	router := mux.NewRouter()
-	conf := config.Parse(configFile)
+
+	conf := config.Parse(settings.ConfigFile)
 	for _, policy := range conf.Policies {
 		core.AddPolicy(policy)
 	}
@@ -33,5 +27,6 @@ func main() {
 		core.AddTransport(factory(router, transport.Configuration, core.HandleAck))
 	}
 	config.Print(conf)
-	api.Init(router)
+
+	api.Init(router, settings)
 }

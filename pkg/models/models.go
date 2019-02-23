@@ -7,6 +7,11 @@ type Config struct {
 	Transports []TransportConfig
 }
 
+type Settings struct {
+	ConfigFile string
+	Port       int
+}
+
 type TransportConfig struct {
 	ID            string
 	Configuration map[string]string

@@ -3,14 +3,17 @@ package api
 import (
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/pakerfeldt/lovi/pkg/core"
+	"github.com/pakerfeldt/lovi/pkg/models"
 )
 
-func Init(router *mux.Router) {
+func Init(router *mux.Router, settings models.Settings) {
 	router.HandleFunc("/alert/trigger/{policy}", getAlert).Methods("GET")
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Printf("Listening on 0.0.0.0:%s\n", strconv.Itoa(settings.Port))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(settings.Port), router))
 }
 
 func getAlert(w http.ResponseWriter, r *http.Request) {
