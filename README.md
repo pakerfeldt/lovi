@@ -15,6 +15,12 @@ Lovi is configured using a yaml file. Here you activate the transports you want 
 
 You can have multiple policies for different needs, each with its own set of configuration.
 
+## Running
+
+The recommended way of running lovi is through Docker.
+`docker run -i -t pakerfeldt/lovi:1.0.0__linux_amd64`.
+Lovi will try to read /config.yaml and listen to port 8080. You may want to change this by setting the `CONFIG` and `PORT` environment variables respectively.
+
 ## Contribute
 
 See [Transports](https://github.com/pakerfeldt/lovi/wiki/Transports) wiki page for a guide on how to add new transports.
