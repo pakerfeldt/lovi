@@ -12,13 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+FROM golang:1.11-alpine as builder
+RUN apk update && apk add --no-cache ca-certificates && update-ca-certificates
+
 FROM {ARG_FROM}
+COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 
 ADD bin/{ARG_OS}_{ARG_ARCH}/{ARG_BIN} /{ARG_BIN}
 ADD config.example.yaml /config.yaml
-
-USER root
-RUN apk --update add ca-certificates
 
 USER nobody:nobody
 ENTRYPOINT ["/{ARG_BIN}"]
