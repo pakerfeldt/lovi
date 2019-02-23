@@ -26,7 +26,6 @@ func main() {
 		}
 		core.AddTransport(factory(router, transport.Configuration, core.HandleAck))
 	}
-	config.Print(conf)
 
 	api.Init(router, settings)
 }
