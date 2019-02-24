@@ -20,7 +20,7 @@ An event is triggered by calling `http://[your-ip]:8080/event/trigger/{policy}?m
 ## Running
 
 The recommended way of running lovi is through Docker.
-`docker run -i -t pakerfeldt/lovi:1.0.0__linux_amd64`.
+`docker run -p 8080:8080 -i -t pakerfeldt/lovi:1.0.0__linux_amd64`.
 Lovi will try to read /config.yaml and listen to port 8080. You may want to change this by setting the `CONFIG` and `PORT` environment variables respectively.
 
 ## Contribute
