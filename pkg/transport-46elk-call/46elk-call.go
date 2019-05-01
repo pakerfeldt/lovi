@@ -2,6 +2,7 @@ package transport46elkCall
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -10,6 +11,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/pakerfeldt/lovi/pkg/transports"
@@ -20,11 +22,13 @@ type Call struct {
 }
 
 type Call46Elk struct {
-	ack      transports.Acknowledge
-	username string
-	password string
-	sender   string
-	calls    map[string]string
+	ack             transports.Acknowledge
+	username        string
+	password        string
+	sender          string
+	baseUrlIncoming string
+	text2speech     string
+	calls           map[string]string
 }
 
 func Id() string {
@@ -44,11 +48,21 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	if !exists {
 		panic(errors.New(Id() + " requires 'password' in configuration."))
 	}
+	baseUrlIncoming, exists := config["baseUrlIncoming"]
+	if !exists {
+		baseUrlIncoming = ""
+	}
+	text2speech, exists := config["text-to-speech"]
+	if !exists {
+		text2speech = ""
+	}
 	transport := Call46Elk{ack: ack,
-		username: username,
-		password: password,
-		sender:   sender,
-		calls:    make(map[string]string)}
+		username:        username,
+		password:        password,
+		sender:          sender,
+		baseUrlIncoming: baseUrlIncoming,
+		text2speech:     text2speech,
+		calls:           make(map[string]string)}
 	router.HandleFunc("/transports/46elks/callaction", transport.incomingCallAction).Methods("POST")
 	return transport
 }
@@ -73,11 +87,23 @@ func (c Call46Elk) incomingCallAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Call46Elk) Send(id string, message string, target string, ack bool) {
+	sound := "sound/beep"
+	if c.text2speech != "" {
+		encodedText := base64.StdEncoding.EncodeToString([]byte(message))
+		sound = strings.Replace(c.text2speech, "{base64}", encodedText, -1)
+	}
+
+	next := ""
+	if c.baseUrlIncoming != "" {
+		next = ", \"next\": \"" + c.baseUrlIncoming + "/transports/46elks/callaction" + "\""
+	}
+
 	data := url.Values{
 		"from":        {c.sender},
 		"to":          {target},
-		"voice_start": {"{\"ivr\": \"sound/beep\",\"digits\": 1,\"timeout\": 10,\"repeat\": 3,\"next\": \"http://node.akerfeldt.se:8080/transports/46elks/callaction\"}"}}
+		"voice_start": {"{\"ivr\": \"" + sound + "\",\"digits\": 1,\"timeout\": 10,\"repeat\": 3" + next + "}"}}
 
+	log.Printf("%s", bytes.NewBufferString(data.Encode()))
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/Calls", bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
@@ -88,17 +114,20 @@ func (c Call46Elk) Send(id string, message string, target string, ack bool) {
 	if err != nil {
 		log.Printf("46elk-call: Error making call: %v\n", err)
 	}
-
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("46elk-call: Error reading response: %v\n", err)
 	}
 
-	var call Call
-	err = json.Unmarshal([]byte(body), &call)
-	if err != nil {
-		log.Printf("46elk-call: Could not parse call response, err was %v\n", err)
+	if resp.StatusCode != 200 {
+		log.Printf("46elk-call: Invalid response code %d, '%s'\n", resp.StatusCode, body)
+	} else {
+		var call Call
+		err = json.Unmarshal([]byte(body), &call)
+		if err != nil {
+			log.Printf("46elk-call: Could not parse call response %s, err was %v\n", body, err)
+		}
+		c.calls[call.ID] = id
 	}
-	c.calls[call.ID] = id
 }

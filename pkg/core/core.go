@@ -49,7 +49,11 @@ func HandleAck(ID string) {
 func HandleEvent(policyId string, message string) error {
 	id := idgenerator.New()
 	messageReplaced := strings.Replace(message, "{{ID}}", id, -1)
-	event := models.Event{ID: id, Time: time.Now(), Policy: policyId, Message: messageReplaced}
+	event := models.Event{
+		ID:      id,
+		Time:    time.Now(),
+		Policy:  policyId,
+		Message: messageReplaced}
 	policy, ok := policies[event.Policy]
 	if !ok {
 		return errors.New("Unknown policy: " + event.Policy)
