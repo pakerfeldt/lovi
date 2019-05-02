@@ -26,7 +26,7 @@ type Call46Elk struct {
 	username        string
 	password        string
 	sender          string
-	baseUrlIncoming string
+	baseURLIncoming string
 	text2speech     string
 	calls           map[string]string
 }
@@ -48,9 +48,9 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	if !exists {
 		panic(errors.New(Id() + " requires 'password' in configuration."))
 	}
-	baseUrlIncoming, exists := config["baseUrlIncoming"]
+	baseURLIncoming, exists := config["baseUrlIncoming"]
 	if !exists {
-		baseUrlIncoming = ""
+		baseURLIncoming = ""
 	}
 	text2speech, exists := config["text-to-speech"]
 	if !exists {
@@ -60,7 +60,7 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 		username:        username,
 		password:        password,
 		sender:          sender,
-		baseUrlIncoming: baseUrlIncoming,
+		baseURLIncoming: baseURLIncoming,
 		text2speech:     text2speech,
 		calls:           make(map[string]string)}
 	router.HandleFunc("/transports/46elks/callaction", transport.incomingCallAction).Methods("POST")
@@ -94,8 +94,8 @@ func (c Call46Elk) Send(id string, message string, target string, ack bool) {
 	}
 
 	next := ""
-	if c.baseUrlIncoming != "" {
-		next = ", \"next\": \"" + c.baseUrlIncoming + "/transports/46elks/callaction" + "\""
+	if c.baseURLIncoming != "" {
+		next = ", \"next\": \"" + c.baseURLIncoming + "/transports/46elks/callaction" + "\""
 	}
 
 	data := url.Values{
