@@ -25,7 +25,7 @@ REGISTRY ?= pakerfeldt
 #VERSION := $(shell git describe --tags --always --dirty)
 #
 # This version-strategy uses a manual value to set the version string
-VERSION := 1.0.3
+VERSION := 1.0.4
 
 ###
 ### These variables should not need tweaking.
