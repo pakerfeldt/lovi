@@ -6,7 +6,7 @@ Lovi is a lightweight pager application for message distribution. It offers a we
 
 This application currently supports the following transport mechanisms:
 
-- SMS / Phone calls (through 46elk.se)
+- SMS / Phone calls (through [46elks.se](https://46elks.se))
 - stdout (for logging)
 
 ## How does it work?
