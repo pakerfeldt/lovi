@@ -103,7 +103,7 @@ func (c Call46Elk) Send(id string, message string, target string, ack bool) {
 		"to":          {target},
 		"voice_start": {"{\"ivr\": \"" + sound + "\",\"digits\": 1,\"timeout\": 10,\"repeat\": 3" + next + "}"}}
 
-	log.Printf("%s", bytes.NewBufferString(data.Encode()))
+	log.Printf("Calling %s with message %s\n", target, message)
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/Calls", bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
