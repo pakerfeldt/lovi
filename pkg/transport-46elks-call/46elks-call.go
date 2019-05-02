@@ -1,4 +1,4 @@
-package transport46elkCall
+package transport46elksCall
 
 import (
 	"bytes"
@@ -21,7 +21,7 @@ type Call struct {
 	ID string
 }
 
-type Call46Elk struct {
+type Call46Elks struct {
 	ack             transports.Acknowledge
 	username        string
 	password        string
@@ -33,7 +33,7 @@ type Call46Elk struct {
 }
 
 func Id() string {
-	return "46elk-call"
+	return "46elks-call"
 }
 
 func CreateTransport(router *mux.Router, config map[string]string, ack transports.Acknowledge) transports.Transport {
@@ -58,7 +58,7 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	if !exists {
 		text2speech = ""
 	}
-	transport := Call46Elk{ack: ack,
+	transport := Call46Elks{ack: ack,
 		username:        username,
 		password:        password,
 		sender:          sender,
@@ -70,11 +70,11 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	return transport
 }
 
-func (Call46Elk) Id() string {
+func (Call46Elks) Id() string {
 	return Id()
 }
 
-func (c Call46Elk) incomingCallAction(w http.ResponseWriter, r *http.Request) {
+func (c Call46Elks) incomingCallAction(w http.ResponseWriter, r *http.Request) {
 	result := r.FormValue("result")
 	callId := r.FormValue("callid")
 	if result == "1" {
@@ -89,7 +89,7 @@ func (c Call46Elk) incomingCallAction(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "{\"hangup\": \"busy\"}")
 }
 
-func (c Call46Elk) Send(id string, message string, target string, ack bool) {
+func (c Call46Elks) Send(id string, message string, target string, ack bool) {
 	if ack {
 		message += " " + c.ackSuffix
 	}

@@ -1,4 +1,4 @@
-package transport46elkSms
+package transport46elksSms
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"github.com/pakerfeldt/lovi/pkg/transports"
 )
 
-type Sms46Elk struct {
+type Sms46Elks struct {
 	ack      transports.Acknowledge
 	username string
 	password string
@@ -20,7 +20,7 @@ type Sms46Elk struct {
 }
 
 func Id() string {
-	return "46elk-sms"
+	return "46elks-sms"
 }
 
 func CreateTransport(router *mux.Router, config map[string]string, ack transports.Acknowledge) transports.Transport {
@@ -36,21 +36,21 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	if !exists {
 		panic(errors.New(Id() + " requires 'password' in configuration."))
 	}
-	transport := Sms46Elk{ack: ack, username: username, password: password, sender: sender}
+	transport := Sms46Elks{ack: ack, username: username, password: password, sender: sender}
 	router.HandleFunc("/transports/46elks/sms", transport.incomingSms).Methods("POST")
 	return transport
 }
 
-func (Sms46Elk) Id() string {
+func (Sms46Elks) Id() string {
 	return Id()
 }
 
-func (s Sms46Elk) incomingSms(w http.ResponseWriter, r *http.Request) {
+func (s Sms46Elks) incomingSms(w http.ResponseWriter, r *http.Request) {
 	message := r.FormValue("message")
 	s.ack(message)
 }
 
-func (s Sms46Elk) Send(id string, message string, target string, ack bool) {
+func (s Sms46Elks) Send(id string, message string, target string, ack bool) {
 	data := url.Values{
 		"from":    {s.sender},
 		"to":      {target},
@@ -65,7 +65,7 @@ func (s Sms46Elk) Send(id string, message string, target string, ack bool) {
 	resp, err := client.Do(req)
 
 	if err != nil {
-		log.Printf("46elk-sms: Error sending sms: %s", err)
+		log.Printf("46elks-sms: Error sending sms: %s", err)
 	}
 
 	defer resp.Body.Close()
