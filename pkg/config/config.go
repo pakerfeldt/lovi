@@ -48,11 +48,6 @@ func Parse(file string) models.Config {
 			policy.AutoResolveAfterSeconds = autoResolveAfterSeconds
 		}
 	}
-
-	for _, policy := range config.Policies {
-		fmt.Printf("AckTimeout: %d\n", policy.AckTimeoutSeconds)
-	}
-
 	return config
 }
 
