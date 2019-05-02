@@ -10,6 +10,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+const defaultAckTimeout int = 15
+const autoResolveAfterSeconds int = 900
+
 func check(e error) {
 	if e != nil {
 		panic(e)
@@ -36,6 +39,20 @@ func Parse(file string) models.Config {
 	config := models.Config{}
 	err = yaml.Unmarshal([]byte(string(dat)), &config)
 	check(err)
+	for i := 0; i < len(config.Policies); i++ {
+		policy := &config.Policies[i]
+		if policy.AckTimeoutSeconds == 0 {
+			policy.AckTimeoutSeconds = defaultAckTimeout
+		}
+		if policy.AutoResolveAfterSeconds == 0 {
+			policy.AutoResolveAfterSeconds = autoResolveAfterSeconds
+		}
+	}
+
+	for _, policy := range config.Policies {
+		fmt.Printf("AckTimeout: %d\n", policy.AckTimeoutSeconds)
+	}
+
 	return config
 }
 
