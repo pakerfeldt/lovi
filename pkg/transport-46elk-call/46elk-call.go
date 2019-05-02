@@ -54,7 +54,7 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	if !exists {
 		baseURLIncoming = ""
 	}
-	text2speech, exists := config["text-to-speech"]
+	text2speech, exists := config["textToSpeech"]
 	if !exists {
 		text2speech = ""
 	}
