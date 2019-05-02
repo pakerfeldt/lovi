@@ -26,6 +26,7 @@ type Call46Elk struct {
 	username        string
 	password        string
 	sender          string
+	ackSuffix       string
 	baseURLIncoming string
 	text2speech     string
 	calls           map[string]string
@@ -48,6 +49,7 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 	if !exists {
 		panic(errors.New(Id() + " requires 'password' in configuration."))
 	}
+	ackSuffix, exists := config["ackSuffix"]
 	baseURLIncoming, exists := config["baseUrlIncoming"]
 	if !exists {
 		baseURLIncoming = ""
@@ -60,6 +62,7 @@ func CreateTransport(router *mux.Router, config map[string]string, ack transport
 		username:        username,
 		password:        password,
 		sender:          sender,
+		ackSuffix:       ackSuffix,
 		baseURLIncoming: baseURLIncoming,
 		text2speech:     text2speech,
 		calls:           make(map[string]string)}
@@ -87,6 +90,9 @@ func (c Call46Elk) incomingCallAction(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c Call46Elk) Send(id string, message string, target string, ack bool) {
+	if ack {
+		message += " " + c.ackSuffix
+	}
 	sound := "sound/beep"
 	if c.text2speech != "" {
 		encodedText := base64.StdEncoding.EncodeToString([]byte(message))
@@ -104,6 +110,7 @@ func (c Call46Elk) Send(id string, message string, target string, ack bool) {
 		"voice_start": {"{\"ivr\": \"" + sound + "\",\"digits\": 1,\"timeout\": 10,\"repeat\": 3" + next + "}"}}
 
 	log.Printf("Calling %s with message %s\n", target, message)
+
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/Calls", bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
@@ -130,4 +137,5 @@ func (c Call46Elk) Send(id string, message string, target string, ack bool) {
 		}
 		c.calls[call.ID] = id
 	}
+
 }
