@@ -75,8 +75,11 @@ func sendEvent(event models.Event, policy models.Policy, ackRequired bool) {
 			go transport.Send(event.ID, event.Message, target, ackRequired)
 		}
 	} else {
-		transport := transports[policy.Receivers[event.ReceiverIndex].Transport]
-		target := policy.Receivers[event.ReceiverIndex].Target
+		numReceivers := len(policy.Receivers)
+		receiver := policy.Receivers[event.ReceiverIndex%numReceivers]
+		transport := transports[receiver.Transport]
+		target := receiver.Target
+
 		go transport.Send(event.ID, event.Message, target, ackRequired)
 	}
 }
@@ -92,6 +95,7 @@ func scheduleEventWithAckRequired(timer *time.Timer, event models.Event, policy 
 				unAckedEvents.Delete(event.ID)
 			} else {
 				sendEvent(event, policy, true)
+				event.ReceiverIndex++
 				scheduleEventWithAckRequired(time.NewTimer(time.Duration(policy.AckTimeoutSeconds)*time.Second), event, policy)
 			}
 		}
